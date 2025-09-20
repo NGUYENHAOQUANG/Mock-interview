@@ -1,6 +1,7 @@
 import Image from "next/image";
 import React from "react";
 import { Button } from "@/components/ui/button";
+import CreateInterviewDialog from "../_components/CreateInterviewDialog";
 
 function EmptyState() {
   return (
@@ -15,7 +16,7 @@ function EmptyState() {
       <h2 className="text-center text-2xl mt-8 text-gray-300">
         You do not have any interview created
       </h2>
-      <Button className="mt-8">+ Create Interview</Button>
+      <CreateInterviewDialog />
     </div>
   );
 }
