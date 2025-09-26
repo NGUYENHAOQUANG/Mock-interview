@@ -13,12 +13,20 @@ import {
 import { Button } from "@/components/ui/button";
 import ResumeUpload from "./ResumeUpload";
 import JobDescription from "./JobDescription";
-import { useState } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
+import { Loader2Icon } from "lucide-react";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { UserDetailContext } from "@/context/UserDetailProvider";
 function CreateInterviewDialog() {
   const [formData, setFormData] = useState<any>();
   const [file, setFile] = useState<File | null>();
   const [loading, setLoading] = useState(false);
+  const { userDetails, setUserDetails } = useContext<any>(UserDetailContext);
+  const saveInterviewQuestion = useMutation(
+    api.interview.saveInterviewQuestion
+  );
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev: any) => ({
       ...prev,
@@ -38,7 +46,16 @@ function CreateInterviewDialog() {
         "/api/generate-interview-question",
         formData
       );
-      console.log(res);
+      console.log(res.data);
+
+      //save database
+
+      const resp = await saveInterviewQuestion({
+        interviewQuestion: res.data?.questions,
+        resumeUrl: res?.data.resumeUrl,
+        userID: userDetails?._id,
+      });
+      console.log("resp", resp);
     } catch (e) {
       console.log(e);
     } finally {
@@ -84,7 +101,7 @@ function CreateInterviewDialog() {
             </Button>
           </DialogClose>
           <Button onClick={onSubmit} disabled={loading || !file}>
-            Submit
+            {loading && <Loader2Icon className="animate-spin" />} Submit
           </Button>
         </DialogFooter>
       </DialogContent>

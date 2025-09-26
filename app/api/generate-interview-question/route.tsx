@@ -33,8 +33,11 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    console.log(result.data);
-    return NextResponse.json(result.data, { status: 200 });
+    console.log(result.data.interview_questions);
+    return NextResponse.json({
+      questions: result.data.interview_questions,
+      resumeUrl: uploadResponse?.url,
+    });
   } catch (error: any) {
     console.log("upload error", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
