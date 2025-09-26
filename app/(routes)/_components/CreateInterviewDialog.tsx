@@ -19,11 +19,12 @@ import { Loader2Icon } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { UserDetailContext } from "@/context/UserDetailProvider";
+
 function CreateInterviewDialog() {
   const [formData, setFormData] = useState<any>();
   const [file, setFile] = useState<File | null>();
   const [loading, setLoading] = useState(false);
-  const { userDetails, setUserDetails } = useContext<any>(UserDetailContext);
+  const { userDetails, setUserDetails } = useContext(UserDetailContext);
   const saveInterviewQuestion = useMutation(
     api.interview.saveInterviewQuestion
   );
@@ -37,23 +38,24 @@ function CreateInterviewDialog() {
   console.log(formData);
 
   const onSubmit = async () => {
-    if (!file) return;
     setLoading(true);
-    const formData = new FormData();
-    formData.append("file", file);
+    const formData_ = new FormData();
+    formData_.append("file", file ?? "");
+    formData_.append("jobDescription", formData?.jobDescription);
+    formData_.append("jobTitle", formData?.jobTitle);
     try {
       const res = await axios.post(
         "/api/generate-interview-question",
-        formData
+        formData_
       );
-      console.log(res.data);
+      console.log(res);
 
       //save database
 
       const resp = await saveInterviewQuestion({
-        interviewQuestion: res.data?.questions,
-        resumeUrl: res?.data.resumeUrl,
-        userID: userDetails?._id,
+        questions: res?.data.questions,
+        resumeUrl: res?.data.resumeUrl ?? "",
+        uid: userDetails?._id,
       });
       console.log("resp", resp);
     } catch (e) {
@@ -62,6 +64,7 @@ function CreateInterviewDialog() {
       setLoading(false);
     }
   };
+
   return (
     <Dialog>
       <DialogTrigger>
@@ -100,7 +103,7 @@ function CreateInterviewDialog() {
               Cancel
             </Button>
           </DialogClose>
-          <Button onClick={onSubmit} disabled={loading || !file}>
+          <Button onClick={onSubmit} disabled={loading}>
             {loading && <Loader2Icon className="animate-spin" />} Submit
           </Button>
         </DialogFooter>

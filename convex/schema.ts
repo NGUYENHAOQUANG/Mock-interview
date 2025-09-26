@@ -1,6 +1,5 @@
 import { defineSchema, defineTable } from "convex/server"; //
 import { v } from "convex/values";
-import { Inter } from "next/font/google";
 
 export default defineSchema({
   UserTable: defineTable({
@@ -11,7 +10,7 @@ export default defineSchema({
 
   InterviewQuestionTable: defineTable({
     interviewQuestion: v.any(),
-    resumeUrl: v.string(),
+    resumeUrl: v.optional(v.string()),
     status: v.string(),
     userId: v.id("UserTable"),
   }),

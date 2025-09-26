@@ -11,33 +11,48 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get("file") as File;
+    const jobTitle = formData.get("jobTitle") as string;
+    const jobDescription = formData.get("jobDescription") as string;
 
-    if (!file) {
-      return NextResponse.json({ error: "File not found" });
-    }
-    console.log("file", formData);
-    const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    if (file) {
+      console.log("file", formData);
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
 
-    const uploadResponse = await imagekit.upload({
-      file: buffer,
-      fileName: `upload-${Date.now()}.pdf`,
-      isPublished: true,
-      useUniqueFileName: true,
-    });
+      const uploadResponse = await imagekit.upload({
+        file: buffer,
+        fileName: `upload-${Date.now()}.pdf`,
+        isPublished: true,
+        useUniqueFileName: true,
+      });
 
-    const result = await axios.post(
-      "http://localhost:5678/webhook-test/generate-interview-question",
-      {
+      const result = await axios.post(
+        "http://localhost:5678/webhook-test/generate-interview-question",
+        {
+          resumeUrl: uploadResponse?.url,
+        }
+      );
+
+      console.log(result.data.interview_questions);
+      return NextResponse.json({
+        questions: result.data?.interview_questions,
         resumeUrl: uploadResponse?.url,
-      }
-    );
-
-    console.log(result.data.interview_questions);
-    return NextResponse.json({
-      questions: result.data.interview_questions,
-      resumeUrl: uploadResponse?.url,
-    });
+      });
+    } else {
+      const result = await axios.post(
+        "http://localhost:5678/webhook-test/generate-interview-question",
+        {
+          resumeUrl: null,
+          jobTitle: jobTitle,
+          jobDescription: jobDescription,
+        }
+      );
+      console.log(result.data);
+      return NextResponse.json({
+        questions: result.data?.interview_questions,
+        resumeUrl: null,
+      });
+    }
   } catch (error: any) {
     console.log("upload error", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
