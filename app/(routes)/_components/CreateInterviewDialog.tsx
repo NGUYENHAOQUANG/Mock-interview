@@ -19,12 +19,16 @@ import { Loader2Icon } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { UserDetailContext } from "@/context/UserDetailProvider";
+import { useRouter } from "next/navigation";
+import { toast, Toaster } from "sonner";
 
 function CreateInterviewDialog() {
   const [formData, setFormData] = useState<any>();
   const [file, setFile] = useState<File | null>();
   const [loading, setLoading] = useState(false);
   const { userDetails, setUserDetails } = useContext(UserDetailContext);
+  const router = useRouter();
+
   const saveInterviewQuestion = useMutation(
     api.interview.saveInterviewQuestion
   );
@@ -48,16 +52,20 @@ function CreateInterviewDialog() {
         "/api/generate-interview-question",
         formData_
       );
-      console.log(res);
+      console.log(res.data);
+
+      if (res?.data?.status === 429) {
+        toast.warning(res?.data?.result);
+        return;
+      }
 
       //save database
-
       const resp = await saveInterviewQuestion({
         questions: res?.data.questions,
         resumeUrl: res?.data.resumeUrl ?? "",
         uid: userDetails?._id,
       });
-      console.log("resp", resp);
+      router.push(`/interview/${resp}`);
     } catch (e) {
       console.log(e);
     } finally {
