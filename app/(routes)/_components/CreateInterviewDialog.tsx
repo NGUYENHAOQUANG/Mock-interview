@@ -39,8 +39,6 @@ function CreateInterviewDialog() {
     }));
   };
 
-  console.log(formData);
-
   const onSubmit = async () => {
     setLoading(true);
     const formData_ = new FormData();
@@ -66,6 +64,7 @@ function CreateInterviewDialog() {
         uid: userDetails?._id,
       });
       router.push(`/interview/${resp}`);
+      console.log(resp);
     } catch (e) {
       console.log(e);
     } finally {
