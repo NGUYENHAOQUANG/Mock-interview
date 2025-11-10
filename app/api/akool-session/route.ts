@@ -7,8 +7,8 @@ export async function POST(req: NextRequest) {
   const result = await axios.post(
     "https://openapi.akool.com/api/open/v4/LiveAvatar/session/create",
     {
-      avatar_id,
-      knowledge_id,
+      avatar_id: avatar_id,
+      knowledge_id: knowledge_id,
     },
     {
       headers: {

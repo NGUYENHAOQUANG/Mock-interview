@@ -24,7 +24,7 @@ const AVATAR_ID = "data_lira_sp-02";
 function StartInterview() {
   const { interviewId } = useParams();
   const convex = useConvex();
-  const [interviewData, setInterviewData] = useState<InterviewData[]>([]);
+  const [interviewData, setInterviewData] = useState<any>(null);
   const videoContainerRef = useRef<any>(null);
   const [agoraSdk, setAgoraSdk] = useState<GenericAgoraSDK | null>(null);
   const [micOn, setMicOn] = useState(false);
@@ -37,6 +37,7 @@ function StartInterview() {
   const GetInterviewQuestions = async () => {
     try {
       const result = await convex.query(api.interview.getInterviewQuestions, {
+        // @ts-ignore
         interviewRecordId: interviewId,
       });
       console.log(result);
@@ -48,28 +49,25 @@ function StartInterview() {
 
   useEffect(() => {
     if (interviewData) {
-      GetknowledgeBase();
+      GetKnowledgeBase();
     }
   }, [interviewData]);
 
-  const GetknowledgeBase = async () => {
-    if (
-      interviewData &&
-      interviewData.length > 0 &&
-      interviewData[0].interviewQuestion
-    ) {
+  const GetKnowledgeBase = async () => {
+    if (interviewData && interviewData.interviewQuestion) {
       const result = await axios.post("/api/akool-knowledge-base", {
-        questions: interviewData[0].interviewQuestion,
+        questions: interviewData.interviewQuestion,
       });
       console.log(result);
       setKbId(result.data?.data?._id);
-      console.log(interviewData[0].interviewQuestion);
+      console.log(interviewData.interviewQuestion);
     } else {
       console.log("Interview data is not ready or empty");
     }
   };
 
   const startConversation = async () => {
+    if (!agoraSdk) return;
     const result = await axios.post("/api/akool-session", {
       avatar_id: AVATAR_ID,
       knowledge_id: kbId,
@@ -80,10 +78,10 @@ function StartInterview() {
     if (!credentials) throw new Error("Missing credentials");
 
     await agoraSdk?.joinChannel({
-      agora_app_id: "your-app-id",
-      agora_channel: "your-channel",
-      agora_token: "your-token",
-      agora_uid: 12345,
+      agora_app_id: credentials.agora_app_id,
+      agora_channel: credentials.agora_channel,
+      agora_token: credentials.agora_token,
+      agora_uid: credentials.agora_uid,
     });
 
     agoraSdk?.joinChat({
