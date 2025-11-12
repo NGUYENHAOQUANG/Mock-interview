@@ -131,19 +131,29 @@ function StartInterview() {
 
       await agoraSdk.joinChat({
         vid: "6889b610662160e2caad5d8e",
-        lang: "vi",
+        lang: "vi-VN",
         mode: 2,
       });
 
-      const prompt = `Bạn là một người phỏng vấn thân thiện.
-                  Hãy hỏi ứng viên từng câu hỏi một.
-                  Đợi họ trả lời trước khi hỏi câu hỏi tiếp theo.
-                  Hãy bắt đầu bằng: "Hãy giới thiệu về bạn."
-                  Sau đó, hãy hỏi từng câu hỏi sau.
-                  Hãy nói với giọng điệu chuyên nghiệp và khích lệ.
-                  Các câu hỏi:
-                  ${interviewData?.interviewQuestion.map((q: any) => q.question).join("\n")}
-                  Sau khi người dùng trả lời, hãy hỏi câu hỏi tiếp theo trong danh sách.Không lặp lại các câu hỏi trước đó.`;
+      const prompt = `
+Bạn là một **người phỏng vấn thân thiện và chuyên nghiệp**, có nhiệm vụ **phỏng vấn ứng viên** theo từng câu hỏi trong danh sách dưới đây.
+
+Mục tiêu:
+- Hỏi **từng câu hỏi một**, **chờ ứng viên trả lời xong** rồi mới hỏi câu tiếp theo.
+- **Không lặp lại** hoặc **nhắc lại** các câu hỏi đã hỏi trước đó.
+- Giữ phong thái **thân thiện, chuyên nghiệp, khích lệ** và tạo cảm giác tự nhiên như một buổi phỏng vấn thực sự.
+- Có thể phản hồi ngắn gọn (ví dụ: “Cảm ơn bạn, rất hay!”) trước khi chuyển sang câu tiếp theo.
+
+ Bắt đầu buổi phỏng vấn bằng câu:
+"Hãy giới thiệu đôi chút về bạn."
+
+Sau đó, lần lượt hỏi các câu hỏi dưới đây (theo thứ tự):
+${interviewData?.interviewQuestion.map((q: any) => q.question).join("\n")}
+
+Khi tất cả các câu hỏi đã được hỏi và trả lời, hãy kết thúc buổi phỏng vấn bằng một lời cảm ơn lịch sự, ví dụ:
+"Buổi phỏng vấn hôm nay đến đây là kết thúc. Cảm ơn bạn đã chia sẻ và dành thời gian!"
+`;
+
       await agoraSdk.sendMessage(prompt);
 
       await agoraSdk.toggleMic(); // Bật mic ngay khi join
@@ -174,23 +184,40 @@ function StartInterview() {
   };
 
   const GenerateFeedBack = async () => {
-    toast.warning("Generating feedback...");
-    const result = await axios.post("/api/interview-feedback", {
-      messages: DUMMY_COVERSATION,
-    });
-    toast.success("Feedback generated successfully!");
-    console.log(result.data);
-    toast.success("Feedback Ready!");
-    // Save the feedback
-    const resp = await updateFeedback({
-      feedback: result.data,
-      //@ts-ignore
-      recordId: interviewId,
-    });
-    console.log(resp);
-    toast.success("Feedback saved successfully!");
+    if (message.length === 0) {
+      toast.error("No conversation recorded.");
+      return;
+    }
 
-    // router.replace("/dashboard");
+    const cleanMessages = message
+      .filter((msg) => msg.text?.trim())
+      .map((msg) => ({
+        from: msg.from,
+        text: msg.text.trim(),
+      }));
+
+    console.log("Dữ liệu gửi đến backend:", cleanMessages);
+
+    toast.warning("Generating feedback from real conversation...");
+
+    try {
+      const result = await axios.post("/api/interview-feedback", {
+        messages: cleanMessages,
+      });
+
+      toast.success("Feedback generated!");
+
+      await updateFeedback({
+        feedback: result.data,
+        // @ts-ignore
+        recordId: interviewId,
+      });
+
+      toast.success("Feedback saved!");
+      router.replace("/dashboard");
+    } catch (error: any) {
+      toast.error("Feedback failed: " + error.message);
+    }
   };
 
   useEffect(() => {
@@ -320,19 +347,20 @@ function StartInterview() {
             </div>
           ) : (
             <div>
-              {message?.map((msg, index) => (
-                <div key={index}>
-                  <h2
-                    className={`p-3 rounded-lg max-w-[80%] mt-1
-                          ${
-                            msg.from == "user"
-                              ? "bg-blue-100 text-blue-700 self-start"
-                              : "bg-green-100 text-green-700 self-end"
-                          }
-                        `}
+              {message.map((msg, index) => (
+                <div
+                  key={index}
+                  className={`flex ${msg.from === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div
+                    className={`p-3 rounded-lg max-w-[80%] mt-1 ${
+                      msg.from === "user"
+                        ? "bg-blue-500 text-white"
+                        : "bg-green-100 text-green-800"
+                    }`}
                   >
                     {msg.text}
-                  </h2>
+                  </div>
                 </div>
               ))}
             </div>
