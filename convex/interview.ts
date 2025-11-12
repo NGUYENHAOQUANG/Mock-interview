@@ -30,3 +30,31 @@ export const getInterviewQuestions = query({
     return result[0];
   },
 });
+
+export const UpdateFeedback = mutation({
+  args: {
+    recordId: v.id("InterviewQuestionTable"),
+    feedback: v.any(),
+  },
+  handler: async (ctx, args) => {
+    const result = await ctx.db.patch(args.recordId, {
+      feedback: args.feedback,
+      status: "complete",
+    });
+    return result;
+  },
+});
+
+export const GetInterviewList = query({
+  args: {
+    uid: v.id("UserTable"),
+  },
+  handler: async (ctx, args) => {
+    const result = await ctx.db
+      .query("InterviewQuestionTable")
+      .filter((q) => q.eq(q.field("userId"), args.uid))
+      .order("desc")
+      .collect();
+    return result;
+  },
+});

@@ -13,5 +13,6 @@ export default defineSchema({
     resumeUrl: v.optional(v.string()),
     status: v.string(),
     userId: v.id("UserTable"),
+    feedback: v.optional(v.any()),
   }),
 });

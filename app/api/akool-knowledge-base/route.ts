@@ -21,15 +21,16 @@ export async function POST(req: NextRequest) {
       "https://openapi.akool.com/api/open/v4/knowledge/create",
       {
         name: "Interview Agent Prod" + Date.now(),
-        prologue: "tell me about yourself",
-        prompt: `You are a friendly job interviewer.
-        Ask the user one interview question at a time.
-        Wait for their spoken response before asking the next question.
-        Start with: "Tell me about yourself."
-        Then ask following questions one by one.
-        Speak in a professional and encouraging tone.
-        questions:
-        ${JSON.stringify(question)}`,
+        prologue: "",
+        prompt: `Bạn là một người phỏng vấn thân thiện.
+                  Hãy hỏi ứng viên từng câu hỏi một.
+                  Đợi họ trả lời trước khi hỏi câu hỏi tiếp theo.
+                  Hãy bắt đầu bằng: "Hãy giới thiệu về bạn."
+                  Sau đó, hãy hỏi từng câu hỏi sau.
+                  Hãy nói với giọng điệu chuyên nghiệp và khích lệ.
+                  Các câu hỏi:
+        ${question?.interviewQuestion.map((q: any) => q.question).join("\n")}
+                  Sau khi người dùng trả lời, hãy hỏi câu hỏi tiếp theo trong danh sách.Không lặp lại các câu hỏi trước đó.`,
       },
       {
         headers: {
