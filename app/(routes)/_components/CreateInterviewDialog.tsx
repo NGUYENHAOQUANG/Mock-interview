@@ -1,4 +1,3 @@
-import React, { ReactNode } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -62,6 +61,8 @@ function CreateInterviewDialog() {
         questions: res?.data.questions,
         resumeUrl: res?.data.resumeUrl ?? "",
         uid: userDetails?._id,
+        jobTitle: formData?.jobTitle ?? "",
+        jobDescription: formData?.jobDescription ?? "",
       });
       router.push(`/interview/${resp}`);
       console.log(resp);

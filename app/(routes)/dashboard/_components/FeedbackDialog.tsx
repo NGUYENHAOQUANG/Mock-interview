@@ -17,6 +17,7 @@ type FeedBackInfo = {
   feedback: string;
   rating: number;
   suggestion: string[];
+  
 };
 
 function FeedbackDialog({ feedbackInfo }: Props) {

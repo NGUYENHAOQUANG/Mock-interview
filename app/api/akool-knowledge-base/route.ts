@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
         Sau đó, lần lượt hỏi các câu hỏi dưới đây (theo thứ tự):
         ${question?.interviewQuestion.map((q: any) => q.question).join("\n")}
 
+        phải hỏi xong tất cả các câu hỏi có trong danh sách mới được kết thúc buổi phỏng vấn.
         Khi tất cả các câu hỏi đã được hỏi và trả lời, hãy kết thúc buổi phỏng vấn bằng một lời cảm ơn lịch sự, ví dụ:
         "Buổi phỏng vấn hôm nay đến đây là kết thúc. Cảm ơn bạn đã chia sẻ và dành thời gian!"`,
       },

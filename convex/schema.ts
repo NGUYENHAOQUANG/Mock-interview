@@ -14,5 +14,7 @@ export default defineSchema({
     status: v.string(),
     userId: v.id("UserTable"),
     feedback: v.optional(v.any()),
+    jobTitle: v.optional(v.string()),
+    jobDescription: v.optional(v.string()),
   }),
 });
