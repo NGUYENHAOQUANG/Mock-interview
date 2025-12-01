@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       });
 
       const result = await axios.post(
-        "http://localhost:5678/webhook-test/generate-interview-question",
+        "http://localhost:5678/webhook/generate-interview-question",
         {
           resumeUrl: uploadResponse?.url,
         }
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
       });
     } else {
       const result = await axios.post(
-        "http://localhost:5678/webhook-test/generate-interview-question",
+        "http://localhost:5678/webhook/generate-interview-question",
         {
           resumeUrl: null,
           jobTitle: jobTitle,

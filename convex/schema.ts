@@ -16,5 +16,13 @@ export default defineSchema({
     feedback: v.optional(v.any()),
     jobTitle: v.optional(v.string()),
     jobDescription: v.optional(v.string()),
+    transcript: v.optional(
+      v.array(
+        v.object({
+          from: v.string(),
+          text: v.string(),
+        })
+      )
+    ),
   }),
 });

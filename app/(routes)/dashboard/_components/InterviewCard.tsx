@@ -9,7 +9,7 @@ import {
 import Link from "next/link";
 import React from "react";
 import FeedbackDialog from "./FeedbackDialog";
-import InterviewDetailDialog from "./InterviewDetailDialog"; // Import component mới
+import InterviewDetailDialog from "./InterviewDetailDialog";
 
 function InterviewCard({ interviewInfo }: any) {
   // Helper format ngày tháng
@@ -92,7 +92,11 @@ function InterviewCard({ interviewInfo }: any) {
         <div className="flex flex-col sm:flex-row gap-2">
           {interviewInfo?.feedback ? (
             <div className="w-full">
-              <FeedbackDialog feedbackInfo={interviewInfo.feedback} />
+              {/* TRUYỀN THÊM TRANSCRIPT VÀO ĐÂY */}
+              <FeedbackDialog
+                feedbackInfo={interviewInfo.feedback}
+                transcript={interviewInfo.transcript}
+              />
             </div>
           ) : null}
 

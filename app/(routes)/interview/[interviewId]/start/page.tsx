@@ -5,6 +5,7 @@ import { useConvex, useMutation } from "convex/react";
 import { useParams } from "next/navigation";
 import React, { useEffect, useState, useRef } from "react";
 import { GenericAgoraSDK } from "akool-streaming-avatar-sdk";
+import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import {
   PhoneCall,
@@ -21,7 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 
 const CONTAINER_ID = "akool-avatar-container";
-const AVATAR_ID = "dvp_Alinna_realisticbg_20241224";
+const AVATAR_ID = "dvp_Alinna_emotionsit_20250116";
 
 type Messages = {
   from: "user" | "bot";
@@ -253,23 +254,32 @@ function StartInterview() {
       toast.error("No conversation recorded.");
       return;
     }
+
+    // Lọc tin nhắn rỗng
     const cleanMessages = message
       .filter((msg) => msg.text?.trim())
       .map((msg) => ({ from: msg.from, text: msg.text.trim() }));
 
     toast.warning("Generating feedback...");
+
     try {
+      // 1. Lấy AI Feedback (Giữ nguyên)
       const result = await axios.post("/api/interview-feedback", {
         messages: cleanMessages,
       });
-      toast.success("Feedback generated!");
+
+      // 2. Lưu vào DB (Thêm transcript: cleanMessages)
       await updateFeedback({
         feedback: result.data,
-        // @ts-ignore
-        recordId: interviewId,
+        // @ts-ignore - Đảm bảo backend đã hỗ trợ field này
+        transcript: cleanMessages,
+        recordId: interviewId as Id<"InterviewQuestionTable">,
       });
+
+      toast.success("Feedback generated!");
       router.replace("/dashboard");
     } catch (error: any) {
+      console.error(error);
       toast.error("Feedback failed: " + error.message);
     }
   };

@@ -39,10 +39,21 @@ export const UpdateFeedback = mutation({
   args: {
     recordId: v.id("InterviewQuestionTable"),
     feedback: v.any(),
+    // THÊM DÒNG NÀY ĐỂ NHẬN TRANSCRIPT
+    transcript: v.optional(
+      v.array(
+        v.object({
+          from: v.string(),
+          text: v.string(),
+        })
+      )
+    ),
   },
   handler: async (ctx, args) => {
     const result = await ctx.db.patch(args.recordId, {
       feedback: args.feedback,
+      // THÊM DÒNG NÀY ĐỂ LƯU VÀO DB
+      transcript: args.transcript,
       status: "complete",
     });
     return result;
