@@ -124,3 +124,35 @@ video {
     @apply bg-background text-foreground;
   }
 }
+/* Ẩn Next.js Error Overlay và Toolbar */
+nextjs-portal {
+  display: none !important;
+}
+
+/* Ẩn các nút chỉ báo build ở góc (nếu còn sót) */
+#next-build-indicator,
+div[data-nextjs-toast] {
+  display: none !important;
+}
+/* ẨN HOÀN TOÀN PHẦN FOOTER CLERK MỚI NHẤT (2025) – KHÔNG ẢNH HƯỞNG GÌ ĐẾN NÚT SIGN IN/SIGN UP */
+
+/* Ẩn dòng "Secured by" + "Development mode" + link Clerk */
+.cl-footerAction,
+.cl-footerActionLink,
+.cl-footerActionText,
+div[data-localization-key*="footerAction"],
+div[class*="FooterAction"] {
+  display: none !important;
+}
+
+/* Ẩn luôn cả đoạn "Secured by Clerk" nếu còn sót */
+.cl-cardFooter,
+.cl-footer {
+  display: none !important;
+}
+
+/* Ẩn logo nhỏ của Clerk nếu có (hiếm khi có nhưng vẫn phòng) */
+.cl-logoImage,
+.cl-logoBox {
+  display: none !important;
+}

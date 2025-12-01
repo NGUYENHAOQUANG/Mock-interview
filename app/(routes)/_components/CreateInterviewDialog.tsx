@@ -1,10 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -14,28 +12,28 @@ import ResumeUpload from "./ResumeUpload";
 import JobDescription from "./JobDescription";
 import { useState, useContext } from "react";
 import axios from "axios";
-import { Loader2Icon } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { UserDetailContext } from "@/context/UserDetailProvider";
 import { useRouter } from "next/navigation";
-import { toast, Toaster } from "sonner";
+import { toast } from "sonner";
 
 function CreateInterviewDialog() {
   const [formData, setFormData] = useState<any>();
-  const [file, setFile] = useState<File | null>();
+  const [file, setFile] = useState<File | null>(); // State lưu file
   const [loading, setLoading] = useState(false);
-  const { userDetails, setUserDetails } = useContext(UserDetailContext);
+  const { userDetails } = useContext(UserDetailContext);
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("resume-upload");
 
   const saveInterviewQuestion = useMutation(
     api.interview.saveInterviewQuestion
   );
+
   const handleInputChange = (field: string, value: string) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
   const onSubmit = async () => {
@@ -44,19 +42,18 @@ function CreateInterviewDialog() {
     formData_.append("file", file ?? "");
     formData_.append("jobDescription", formData?.jobDescription);
     formData_.append("jobTitle", formData?.jobTitle);
+
     try {
       const res = await axios.post(
         "/api/generate-interview-question",
         formData_
       );
-      console.log(res.data);
 
       if (res?.data?.status === 429) {
         toast.warning(res?.data?.result);
         return;
       }
 
-      //save database
       const resp = await saveInterviewQuestion({
         questions: res?.data.questions,
         resumeUrl: res?.data.resumeUrl ?? "",
@@ -64,57 +61,98 @@ function CreateInterviewDialog() {
         jobTitle: formData?.jobTitle ?? "",
         jobDescription: formData?.jobDescription ?? "",
       });
+      setOpen(false);
       router.push(`/interview/${resp}`);
-      console.log(resp);
     } catch (e) {
       console.log(e);
+      toast.error("Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
+  const isButtonDisabled = () => {
+    if (loading) return true;
+    if (activeTab === "resume-upload") return !file;
+    if (activeTab === "job-description")
+      return !(formData?.jobTitle && formData?.jobDescription);
+    return false;
+  };
+
   return (
-    <Dialog>
-      <DialogTrigger>
-        <Button className="mt-8">+ Create Interview</Button>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:brightness-110 border-0 transition-all text-white shadow-lg shadow-violet-500/20">
+          <Plus className="mr-2 h-4 w-4" /> Create Interview
+        </Button>
       </DialogTrigger>
-      <DialogContent className="min-w-3xl">
+
+      <DialogContent className="sm:max-w-3xl bg-slate-900 border-white/10 text-white">
         <DialogHeader>
-          <DialogTitle>Are you absolutely sure?</DialogTitle>
-          <DialogDescription>
-            <Tabs defaultValue="resume-upload" className="w-full mt-5">
-              <TabsList>
-                <TabsTrigger value="resume-upload">Resume Upload</TabsTrigger>
-                <TabsTrigger value="job-description">
-                  Job Description
-                </TabsTrigger>
-              </TabsList>
-              <TabsContent value="resume-upload">
-                <ResumeUpload
-                  setFiles={(file: File) => {
-                    setFile(file);
-                  }}
-                />
-              </TabsContent>
-              <TabsContent value="job-description">
-                <JobDescription handleInputChange={handleInputChange} />
-              </TabsContent>
-            </Tabs>
+          <DialogTitle className="text-2xl font-bold">
+            Create New Interview
+          </DialogTitle>
+          <DialogDescription className="text-slate-400">
+            Choose how you want to generate your interview questions.
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button
-              variant="ghost"
-              className="border-2 border-gray-100 rounded-lg w-20 hover:bg-gray-100"
-            >
-              Cancel
-            </Button>
-          </DialogClose>
-          <Button onClick={onSubmit} disabled={loading}>
-            {loading && <Loader2Icon className="animate-spin" />} Submit
+
+        <div className="mt-4">
+          <Tabs
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full"
+          >
+            <TabsList className="grid w-full grid-cols-2 bg-slate-950 border border-white/5">
+              <TabsTrigger
+                value="resume-upload"
+                className="data-[state=active]:bg-violet-600 data-[state=active]:text-white text-slate-400"
+              >
+                From Resume
+              </TabsTrigger>
+              <TabsTrigger
+                value="job-description"
+                className="data-[state=active]:bg-violet-600 data-[state=active]:text-white text-slate-400"
+              >
+                From Job Desc
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="resume-upload">
+              {/* SỬA CHỖ NÀY: Truyền cả file và setFile xuống */}
+              <ResumeUpload
+                file={file}
+                setFiles={(f: File) => setFile(f)} // Giữ tên prop cũ là setFiles nếu component ResumeUpload bạn chưa đổi tên prop, hoặc đổi thành setFile như code mới tôi đưa
+                setFile={setFile} // Dùng dòng này nếu bạn copy code ResumeUpload mới của tôi
+              />
+            </TabsContent>
+
+            <TabsContent value="job-description">
+              <JobDescription handleInputChange={handleInputChange} />
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        <div className="flex justify-end gap-3 mt-4">
+          <Button
+            variant="ghost"
+            onClick={() => setOpen(false)}
+            className="text-slate-300 hover:bg-slate-800 hover:text-white"
+          >
+            Cancel
           </Button>
-        </DialogFooter>
+          <Button
+            onClick={onSubmit}
+            disabled={isButtonDisabled()}
+            className="bg-violet-600 hover:bg-violet-500 text-white min-w-[100px] disabled:bg-slate-700 disabled:text-slate-500"
+          >
+            {loading ? (
+              <Loader2 className="animate-spin h-4 w-4" />
+            ) : (
+              "Start Interview"
+            )}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
